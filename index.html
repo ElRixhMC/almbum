@@ -44,20 +44,28 @@
     /* --- ENCABEZADO --- */
     header { text-align: center; margin-top: 20px; font-family: 'Segoe UI', sans-serif; }
     h1 { color: var(--primary); margin-bottom: 5px; font-family: 'Georgia', serif; }
-    .upload-btn {
+    
+    .acciones-header {
+      display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 10px; flex-wrap: wrap;
+    }
+    .btn-accion {
       background-color: var(--primary); color: white; padding: 10px 20px;
       border: none; border-radius: 25px; font-size: 15px; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(138, 28, 49, 0.3); transition: transform 0.2s; margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(138, 28, 49, 0.3); transition: transform 0.2s;
+      font-family: 'Segoe UI', sans-serif;
     }
-    .upload-btn:hover { transform: translateY(-2px); }
+    .btn-accion:hover { transform: translateY(-2px); }
+    .btn-secundario {
+      background-color: #fff; color: var(--primary); border: 2px solid var(--primary);
+    }
     #fileInput { display: none; }
     #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; font-weight: bold; }
 
-    /* --- CONTENEDOR DEL LIBRO --- */
+    /* --- CONTENEDOR DEL LIBRO 3D --- */
     #book-container {
       width: 100%;
-      max-width: 800px; /* Ancho máximo de 2 páginas abiertas juntas */
-      height: 500px;    /* Altura fija para evitar que colapse */
+      max-width: 800px; 
+      height: 500px;    
       margin: 20px auto 40px auto;
       display: block;   
     }
@@ -77,7 +85,6 @@
       background-image: radial-gradient(circle, #fff 0%, var(--page-bg) 100%);
     }
 
-    /* Tapas duras */
     .page-cover {
       background-color: var(--primary);
       color: white;
@@ -86,7 +93,32 @@
     .page-cover h2 { font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center; margin: 0; }
     .page-cover p { font-size: 1.2rem; font-style: italic; opacity: 0.9; margin-top: 10px; }
     
-    /* Imágenes tipo Polaroid */
+    /* --- VISTA GALERÍA TRADICIONAL --- */
+    #gallery-container {
+      display: none; /* Oculto por defecto */
+      width: 90%; max-width: 1000px;
+      margin: 30px auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding-bottom: 50px;
+    }
+    .polaroid-card {
+      background: white; padding: 15px 15px 25px 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15); border-radius: 4px;
+      display: flex; flex-direction: column; align-items: center;
+      transition: transform 0.3s;
+    }
+    .polaroid-card:hover { transform: translateY(-5px); }
+    .polaroid-card img {
+      width: 100%; height: 260px; object-fit: cover; border-radius: 2px;
+      cursor: pointer;
+    }
+    .polaroid-card span {
+      margin-top: 15px; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #555;
+    }
+
+    /* Imágenes tipo Polaroid dentro del libro */
     .page-content img {
       max-width: 90%; max-height: 70%;
       border: 8px solid white; 
@@ -94,7 +126,6 @@
       box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
     }
 
-    /* Botón Ver foto */
     .btn-ver {
       margin-top: 15px; background-color: transparent; border: 1px solid var(--primary);
       color: var(--primary); padding: 5px 15px; border-radius: 15px;
@@ -145,17 +176,23 @@
 
   <header>
     <h1>Nuestro Álbum</h1>
-    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-      + Añadir un recuerdo
-    </button>
+    <div class="acciones-header">
+      <button class="btn-accion" onclick="document.getElementById('fileInput').click()">+ Añadir recuerdo</button>
+      <button class="btn-accion btn-secundario" id="btnCambiarVista" onclick="alternarVista()">🖼️ Ver en Galería</button>
+    </div>
     <input type="file" id="fileInput" accept="image/*" onchange="subirFoto(this)">
     <div id="status"></div>
   </header>
 
   <div id="loadingText" class="loading-spinner"></div>
   
+  <!-- Contenedor del Libro 3D -->
   <div id="book-container"></div>
 
+  <!-- Contenedor de la Galería Tradicional -->
+  <div id="gallery-container"></div>
+
+  <!-- Lightbox de Zoom -->
   <div id="lightbox">
     <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
     <img id="lightbox-img" src="">
@@ -166,10 +203,12 @@
   </div>
 
   <script>
-    // ⚠️ REEMPLAZA ESTO POR TU ENLACE REAL DE GOOGLE APPS SCRIPT
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynOF8xHfgyOSoMDstSCHAHAFFRHm04zu31YqYrDJrf4_D8VMfMBhFrrd2gYKPb8MiS/exec'; 
+    // ⚠️ REEMPLAZA ESTO CON TU ENLACE DE GOOGLE APPS SCRIPT
+    const SCRIPT_URL = 'AQUI_VA_TU_ENLACE'; 
     
     let albumFlip = null; 
+    let cacheFotos = [];  // Guardamos las fotos para cambiar de vista sin recargar
+    let modoLibroActivo = true;
 
     function iniciarExperiencia() {
       const musica = document.getElementById('musica-fondo');
@@ -183,6 +222,26 @@
         document.getElementById('loadingText').innerText = '⏳ Desempolvando nuestro álbum...';
         cargarFotos(); 
       }, 800);
+    }
+
+    // Alternar entre modo libro y modo galería
+    function alternarVista() {
+      modoLibroActivo = !modoLibroActivo;
+      const bookContainer = document.getElementById('book-container');
+      const galleryContainer = document.getElementById('gallery-container');
+      const btnVista = document.getElementById('btnCambiarVista');
+
+      if (modoLibroActivo) {
+        bookContainer.style.display = 'block';
+        galleryContainer.style.display = 'none';
+        btnVista.innerHTML = '🖼️ Ver en Galería';
+        renderizarLibro();
+      } else {
+        bookContainer.style.display = 'none';
+        galleryContainer.style.display = 'grid';
+        btnVista.innerHTML = '📖 Ver como Libro';
+        renderizarGaleria();
+      }
     }
 
     let nivelZoom = 1;
@@ -209,7 +268,6 @@
     });
 
     async function cargarFotos() {
-      const bookContainer = document.getElementById('book-container');
       const statusText = document.getElementById('loadingText');
 
       try {
@@ -217,85 +275,115 @@
         const data = await response.json();
 
         statusText.style.display = 'none';
-        
-        if (albumFlip) { 
-          albumFlip.destroy(); 
-          albumFlip = null;
-        }
-        
-        let htmlContent = '';
+        cacheFotos = data.photos || [];
 
-        htmlContent += `
-          <div class="page" data-density="hard">
-            <div class="page-content page-cover">
-              <h2>Nuestro Álbum</h2>
-              <p>Karissa & Yo ❤️</p>
-              <span style="font-size: 0.8rem; margin-top: 40px; opacity: 0.6;">(Arrastra la esquina)</span>
-            </div>
-          </div>
-        `;
-
-        if (data.photos && data.photos.length > 0) {
-          data.photos.reverse().forEach(photo => {
-            htmlContent += `
-              <div class="page">
-                <div class="page-content">
-                  <img src="${photo.url}" alt="Recuerdo">
-                  <button class="btn-ver" onclick="abrirLightbox('${photo.url}')">🔍 Ver foto en grande</button>
-                </div>
-              </div>
-            `;
-          });
-
-          if (data.photos.length % 2 !== 0) {
-            htmlContent += `
-              <div class="page">
-                <div class="page-content">
-                  <p style="color:#aaa; font-style:italic; text-align:center;">Esperando nuestro próximo recuerdo...</p>
-                </div>
-              </div>
-            `;
-          }
+        if (modoLibroActivo) {
+          renderizarLibro();
         } else {
-          htmlContent += `
-            <div class="page"><div class="page-content"><p>Aún no hay fotos.</p></div></div>
-            <div class="page"><div class="page-content"><p>¡Sube la primera!</p></div></div>
-          `;
+          renderizarGaleria();
         }
-
-        htmlContent += `
-          <div class="page" data-density="hard">
-            <div class="page-content page-cover">
-              <h2>Fin</h2>
-              <p>Por ahora...</p>
-            </div>
-          </div>
-        `;
-
-        bookContainer.innerHTML = htmlContent;
-
-        // INICIALIZACIÓN CORREGIDA AQUÍ
-        albumFlip = new St.PageFlip(bookContainer, {
-          width: 400,
-          height: 500,
-          size: "stretch",
-          minWidth: 300,
-          maxWidth: 400,        
-          minHeight: 400,
-          maxHeight: 500,
-          showCover: true,
-          usePortrait: true,
-          mobileScrollSupport: false,
-          maxShadowOpacity: 0.4
-        });
-
-        albumFlip.loadFromHTML(document.querySelectorAll('.page'));
 
       } catch (err) {
-        statusText.innerHTML = `❌ Error al crear el libro 3D: <br><small>${err.message}</small>`;
+        statusText.innerHTML = `❌ Error al conectar con Google Drive: <br><small>${err.message}</small>`;
         statusText.style.display = 'block';
         console.error(err);
       }
+    }
+
+    function renderizarLibro() {
+      const bookContainer = document.getElementById('book-container');
+      
+      if (albumFlip) { 
+        albumFlip.destroy(); 
+        albumFlip = null;
+      }
+      
+      let htmlContent = '';
+
+      htmlContent += `
+        <div class="page" data-density="hard">
+          <div class="page-content page-cover">
+            <h2>Nuestro Álbum</h2>
+            <p>Karissa & Yo ❤️</p>
+            <span style="font-size: 0.8rem; margin-top: 40px; opacity: 0.6;">(Arrastra la esquina)</span>
+          </div>
+        </div>
+      `;
+
+      if (cacheFotos.length > 0) {
+        [...cacheFotos].reverse().forEach(photo => {
+          htmlContent += `
+            <div class="page">
+              <div class="page-content">
+                <img src="${photo.url}" alt="Recuerdo">
+                <button class="btn-ver" onclick="abrirLightbox('${photo.url}')">🔍 Ver foto en grande</button>
+              </div>
+            </div>
+          `;
+        });
+
+        if (cacheFotos.length % 2 !== 0) {
+          htmlContent += `
+            <div class="page">
+              <div class="page-content">
+                <p style="color:#aaa; font-style:italic; text-align:center;">Esperando nuestro próximo recuerdo...</p>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        htmlContent += `
+          <div class="page"><div class="page-content"><p>Aún no hay fotos.</p></div></div>
+          <div class="page"><div class="page-content"><p>¡Sube la primera!</p></div></div>
+        `;
+      }
+
+      htmlContent += `
+        <div class="page" data-density="hard">
+          <div class="page-content page-cover">
+            <h2>Fin</h2>
+            <p>Por ahora...</p>
+          </div>
+        </div>
+      `;
+
+      bookContainer.innerHTML = htmlContent;
+
+      albumFlip = new St.PageFlip(bookContainer, {
+        width: 400,
+        height: 500,
+        size: "stretch",
+        minWidth: 300,
+        maxWidth: 400,        
+        minHeight: 400,
+        maxHeight: 500,
+        showCover: true,
+        usePortrait: true,
+        mobileScrollSupport: false,
+        maxShadowOpacity: 0.4
+      });
+
+      albumFlip.loadFromHTML(document.querySelectorAll('.page'));
+    }
+
+    function renderizarGaleria() {
+      const galleryContainer = document.getElementById('gallery-container');
+      let html = '';
+
+      if (cacheFotos.length > 0) {
+        [...cacheFotos].reverse().forEach(photo => {
+          html += `
+            <div class="polaroid-card">
+              <img src="${photo.url}" alt="Recuerdo" onclick="abrirLightbox('${photo.url}')">
+              <span>❤️ ${photo.name || 'Recuerdo'}</span>
+            </div>
+          `;
+        });
+      } else {
+        html = '<p style="text-align:center; grid-column: 1/-1; color: #666;">Aún no hay fotos en el álbum. ¡Sube la primera!</p>';
+      }
+
+      galleryContainer.innerHTML = html;
     }
 
     async function subirFoto(input) {
@@ -304,7 +392,7 @@
       const file = input.files[0];
       const status = document.getElementById('status');
       status.style.color = "#8a1c31";
-      status.innerText = '⏳ Pegando foto en el álbum...';
+      status.innerText = '⏳ Subiendo foto al álbum...';
 
       const reader = new FileReader();
       reader.onload = async function() {
@@ -320,11 +408,11 @@
           const result = await response.json();
           if (result.success) {
             status.style.color = "green";
-            status.innerText = '¡Foto añadida al álbum! 🎉';
+            status.innerText = '¡Foto añadida con éxito! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
             
-            document.getElementById('book-container').innerHTML = '';
-            document.getElementById('loadingText').innerText = 'Actualizando las páginas...';
+            // Recargamos las fotos para actualizar ambas vistas
+            document.getElementById('loadingText').innerText = 'Actualizando álbum...';
             document.getElementById('loadingText').style.display = 'block';
             cargarFotos();
           } else {
