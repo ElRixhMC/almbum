@@ -6,7 +6,7 @@
   <title>Nuestro Álbum ❤️</title>
   
   <!-- Usamos el servidor unpkg que es más estable para importar el motor del libro -->
-  <script src="https://unpkg.com/page-flip/dist/js/page-flip.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
   
   <style>
     :root {
@@ -286,7 +286,8 @@
         bookContainer.innerHTML = htmlContent;
 
         // INICIALIZAR EL MOTOR 3D
-        albumFlip = new StPageFlip.PageFlip(bookContainer, {
+       // INICIALIZAR EL MOTOR 3D
+        albumFlip = new St.PageFlip(bookContainer, {
           width: 400,           // Ancho de una sola página
           height: 500,          // Alto de una sola página
           size: "stretch",      // Se estira hasta llenar su contenedor
