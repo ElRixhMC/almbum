@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nuestro Álbum ❤️</title>
   
-  <!-- Usamos el servidor unpkg que es más estable para importar el motor del libro -->
+  <!-- Librería del motor de libro 3D -->
   <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
   
   <style>
@@ -53,24 +53,23 @@
     #fileInput { display: none; }
     #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; font-weight: bold; }
 
-    /* --- CONTENEDOR DEL LIBRO (CORREGIDO) --- */
+    /* --- CONTENEDOR DEL LIBRO --- */
     #book-container {
       width: 100%;
       max-width: 800px; /* Ancho máximo de 2 páginas abiertas juntas */
       height: 500px;    /* Altura fija para evitar que colapse */
       margin: 20px auto 40px auto;
-      display: block;   /* Ya no usamos flex aquí para no romper el motor 3D */
+      display: block;   
     }
     
     /* --- PÁGINAS DEL LIBRO --- */
     .page {
       background-color: var(--page-bg);
       color: #333;
-      overflow: hidden; /* Obligatorio para el efecto de doblar papel */
+      overflow: hidden; 
       box-shadow: inset 0 0 20px rgba(0,0,0,0.03); 
     }
     
-    /* Contenido interno de cada hoja */
     .page-content {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -95,7 +94,7 @@
       box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
     }
 
-    /* Botón para abrir la foto sin bloquear el arrastre */
+    /* Botón Ver foto */
     .btn-ver {
       margin-top: 15px; background-color: transparent; border: 1px solid var(--primary);
       color: var(--primary); padding: 5px 15px; border-radius: 15px;
@@ -155,10 +154,8 @@
 
   <div id="loadingText" class="loading-spinner"></div>
   
-  <!-- El contenedor exacto del libro -->
   <div id="book-container"></div>
 
-  <!-- Lightbox de Zoom -->
   <div id="lightbox">
     <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
     <img id="lightbox-img" src="">
@@ -169,10 +166,11 @@
   </div>
 
   <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWBewTgXB0yVBwQFRa4InNKEvSF3QzNqPAKO_6eqT5OHn8Nv--fnBek9stZn6lHV0N/exec';
+    // ⚠️ REEMPLAZA ESTO POR TU ENLACE REAL DE GOOGLE APPS SCRIPT
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynOF8xHfgyOSoMDstSCHAHAFFRHm04zu31YqYrDJrf4_D8VMfMBhFrrd2gYKPb8MiS/exec'; 
+    
     let albumFlip = null; 
 
-    // Ocultar pantalla y reproducir música
     function iniciarExperiencia() {
       const musica = document.getElementById('musica-fondo');
       const pantalla = document.getElementById('pantalla-bienvenida');
@@ -187,7 +185,6 @@
       }, 800);
     }
 
-    // Funciones del Visor y Zoom
     let nivelZoom = 1;
     const imgLightbox = document.getElementById('lightbox-img');
     const lightbox = document.getElementById('lightbox');
@@ -211,7 +208,6 @@
       hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
     });
 
-    // Construir el libro con las fotos
     async function cargarFotos() {
       const bookContainer = document.getElementById('book-container');
       const statusText = document.getElementById('loadingText');
@@ -222,7 +218,6 @@
 
         statusText.style.display = 'none';
         
-        // Destruir el libro si ya existía uno (al subir fotos nuevas)
         if (albumFlip) { 
           albumFlip.destroy(); 
           albumFlip = null;
@@ -230,7 +225,6 @@
         
         let htmlContent = '';
 
-        // 1. Portada delantera (data-density="hard" la hace rígida)
         htmlContent += `
           <div class="page" data-density="hard">
             <div class="page-content page-cover">
@@ -241,7 +235,6 @@
           </div>
         `;
 
-        // 2. Páginas con fotos
         if (data.photos && data.photos.length > 0) {
           data.photos.reverse().forEach(photo => {
             htmlContent += `
@@ -254,7 +247,6 @@
             `;
           });
 
-          // Rellenar hoja par si hace falta
           if (data.photos.length % 2 !== 0) {
             htmlContent += `
               <div class="page">
@@ -265,14 +257,12 @@
             `;
           }
         } else {
-          // Páginas vacías iniciales
           htmlContent += `
             <div class="page"><div class="page-content"><p>Aún no hay fotos.</p></div></div>
             <div class="page"><div class="page-content"><p>¡Sube la primera!</p></div></div>
           `;
         }
 
-        // 3. Portada trasera rígida
         htmlContent += `
           <div class="page" data-density="hard">
             <div class="page-content page-cover">
@@ -282,22 +272,20 @@
           </div>
         `;
 
-        // Inyectar el HTML preparado
         bookContainer.innerHTML = htmlContent;
 
-        // INICIALIZAR EL MOTOR 3D
-       // INICIALIZAR EL MOTOR 3D
+        // INICIALIZACIÓN CORREGIDA AQUÍ
         albumFlip = new St.PageFlip(bookContainer, {
-          width: 400,           // Ancho de una sola página
-          height: 500,          // Alto de una sola página
-          size: "stretch",      // Se estira hasta llenar su contenedor
+          width: 400,
+          height: 500,
+          size: "stretch",
           minWidth: 300,
           maxWidth: 400,        
           minHeight: 400,
           maxHeight: 500,
-          showCover: true,      // Activar efecto de tapa dura
-          usePortrait: true,    // Soporte para S25, tablets y monitores
-          mobileScrollSupport: false, // Evita conflictos al arrastrar en celular
+          showCover: true,
+          usePortrait: true,
+          mobileScrollSupport: false,
           maxShadowOpacity: 0.4
         });
 
@@ -310,7 +298,6 @@
       }
     }
 
-    // Lógica para subir a Google Drive
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
@@ -336,7 +323,6 @@
             status.innerText = '¡Foto añadida al álbum! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
             
-            // Recargar libro completo
             document.getElementById('book-container').innerHTML = '';
             document.getElementById('loadingText').innerText = 'Actualizando las páginas...';
             document.getElementById('loadingText').style.display = 'block';
