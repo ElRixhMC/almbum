@@ -207,7 +207,7 @@
     const SCRIPT_URL = 'AQUI_VA_TU_ENLACE'; 
     
     let albumFlip = null; 
-    let cacheFotos = [];  // Guardamos las fotos para cambiar de vista sin recargar
+    let cacheFotos = [];  
     let modoLibroActivo = true;
 
     function iniciarExperiencia() {
@@ -224,7 +224,6 @@
       }, 800);
     }
 
-    // Alternar entre modo libro y modo galería
     function alternarVista() {
       modoLibroActivo = !modoLibroActivo;
       const bookContainer = document.getElementById('book-container');
@@ -267,12 +266,22 @@
       hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
     });
 
+    // 🟢 CARGAR FOTOS CORREGIDO PARA EVITAR EL ERROR DE HTML
     async function cargarFotos() {
       const statusText = document.getElementById('loadingText');
 
       try {
         const response = await fetch(SCRIPT_URL);
-        const data = await response.json();
+        const textResponse = await response.text(); // Leemos como texto primero
+
+        let data;
+        try {
+          data = JSON.parse(textResponse); // Intentamos convertirlo a JSON
+        } catch (e) {
+          // Si falla, significa que Google devolvió HTML (error de despliegue, URL mal escrita o permisos)
+          console.error("Respuesta HTML recibida:", textResponse);
+          throw new Error("El script devolvió HTML en lugar de JSON. Revisa que tu SCRIPT_URL sea correcta y que la aplicación web esté desplegada públicamente ('Cualquier usuario').");
+        }
 
         statusText.style.display = 'none';
         cacheFotos = data.photos || [];
@@ -386,6 +395,7 @@
       galleryContainer.innerHTML = html;
     }
 
+    // 🟢 SUBIR FOTO CORREGIDO PARA VALIDAR RESPUESTAS SEGURAS
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
@@ -405,13 +415,20 @@
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
           });
-          const result = await response.json();
+          
+          const textResponse = await response.text();
+          let result;
+          try {
+            result = JSON.parse(textResponse);
+          } catch (e) {
+            throw new Error("El servidor devolvió HTML al intentar subir la foto. Verifica los permisos de despliegue de tu Apps Script.");
+          }
+
           if (result.success) {
             status.style.color = "green";
             status.innerText = '¡Foto añadida con éxito! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
             
-            // Recargamos las fotos para actualizar ambas vistas
             document.getElementById('loadingText').innerText = 'Actualizando álbum...';
             document.getElementById('loadingText').style.display = 'block';
             cargarFotos();
@@ -422,6 +439,7 @@
         } catch (error) {
           status.style.color = "red";
           status.innerText = 'Error de conexión.';
+          console.error(error);
         }
       };
       reader.readAsDataURL(file);
