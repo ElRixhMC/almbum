@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nuestro album de Recuerdos ❤️</title>
+  <title>Nuestra Album de Recuerdos ❤️</title>
   <style>
     :root {
       --bg: #fff5f5;
@@ -17,92 +17,109 @@
       background-color: var(--bg);
       color: var(--text);
       margin: 0;
-      padding: 20px;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
+      /* Evitar scroll si la pantalla de bienvenida está activa */
+      overflow-x: hidden; 
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 30px;
+    /* --- PANTALLA DE BIENVENIDA --- */
+    #pantalla-bienvenida {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      transition: opacity 0.8s ease;
     }
+    #pantalla-bienvenida h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; text-align: center; padding: 0 20px;}
+    .btn-entrar {
+      background-color: var(--primary); color: white; padding: 15px 30px;
+      border: none; border-radius: 30px; font-size: 18px; cursor: pointer;
+      box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4); transition: transform 0.3s;
+    }
+    .btn-entrar:hover { transform: scale(1.05); }
 
-    h1 {
-      color: var(--primary);
-      margin-bottom: 10px;
-    }
+    header { text-align: center; margin-top: 30px; margin-bottom: 30px; }
+    h1 { color: var(--primary); margin-bottom: 10px; }
 
     .upload-btn {
-      background-color: var(--primary);
-      color: white;
-      padding: 12px 24px;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
-      transition: transform 0.2s, background 0.2s;
+      background-color: var(--primary); color: white; padding: 12px 24px;
+      border: none; border-radius: 25px; font-size: 16px; cursor: pointer;
+      box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3); transition: transform 0.2s;
     }
-
-    .upload-btn:hover {
-      transform: translateY(-2px);
-      background-color: #d62828;
-    }
-
-    #fileInput {
-      display: none;
-    }
-
-    #status {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #666;
-    }
+    .upload-btn:hover { transform: translateY(-2px); }
+    #fileInput { display: none; }
+    #status { margin-top: 15px; font-size: 14px; color: #666; }
 
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 25px;
-      width: 100%;
-      max-width: 1100px;
-      margin-top: 20px;
+      gap: 25px; width: 100%; max-width: 1100px; padding: 20px; box-sizing: border-box;
     }
 
-    /* Estilo Polaroid */
     .polaroid {
-      background: var(--card-bg);
-      padding: 15px 15px 25px 15px;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-      text-align: center;
+      background: var(--card-bg); padding: 15px 15px 25px 15px;
+      border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease; text-align: center; cursor: pointer;
     }
-
-    .polaroid:hover {
-      transform: scale(1.03) rotate(1deg);
-    }
-
+    .polaroid:hover { transform: scale(1.03) rotate(1deg); }
     .polaroid img {
-      width: 100%;
-      height: 220px;
-      object-fit: cover;
-      border-radius: 4px;
-      background-color: #f0f0f0;
+      width: 100%; height: 220px; object-fit: cover;
+      border-radius: 4px; background-color: #f0f0f0;
     }
 
-    .loading-spinner {
-      margin: 40px;
-      font-size: 18px;
-      color: #888;
+    /* --- VISOR DE IMAGEN (LIGHTBOX) --- */
+    #lightbox {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: rgba(0, 0, 0, 0.9); z-index: 3000;
+      flex-direction: column; align-items: center; justify-content: center;
     }
+    #lightbox-img {
+      max-width: 90%; max-height: 80vh; transition: transform 0.2s ease-out;
+      border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .cerrar-lightbox {
+      position: absolute; top: 20px; right: 30px; font-size: 40px;
+      color: white; cursor: pointer; font-weight: bold; z-index: 3010;
+    }
+    .controles-zoom {
+      position: absolute; bottom: 30px; display: flex; gap: 15px; z-index: 3010;
+    }
+    .btn-zoom {
+      background: rgba(255,255,255,0.2); color: white; border: 2px solid white;
+      border-radius: 50%; width: 50px; height: 50px; font-size: 24px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .btn-zoom:hover { background: rgba(255,255,255,0.5); }
+    
+    .loading-spinner { margin: 40px auto; font-size: 18px; color: #888; text-align: center; grid-column: 1 / -1; }
   </style>
 </head>
 <body>
 
+  <!-- Música de fondo (debe estar en la misma carpeta que el archivo HTML) -->
+  <audio id="musica-fondo" loop>
+    <source src="wonderwall.mp3" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+  </audio>
+
+  <!-- Pantalla de bienvenida -->
+  <div id="pantalla-bienvenida">
+    <h1>Richi y Kari ❤️</h1>
+    <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center; padding: 0 15px;">Tengo algo especial preparado para nosotros...</p>
+    <button class="btn-entrar" onclick="iniciarExperiencia()">Abrir Galería ✨</button>
+  </div>
+
   <header>
-    <h1>Nuestro album ❤️</h1>
-    <p>Un espacio para guardar todos nuestros momentos mi karisita</p>
+    <h1>Nuestra Galería ❤️</h1>
+    <p>Un espacio para guardar todos nuestros momentos</p>
     
     <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
        Subir Nueva Foto
@@ -116,10 +133,65 @@
     <div class="loading-spinner" id="loadingText">Cargando nuestras fotos...</div>
   </main>
 
-  <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBDikyaW1jNrXXEdHfQbwxeEvWNy0QApIvrEvmFQp1fWfo3XsjUT8LpWjb_40TzjL0/exec';
+  <!-- Visor de fotos grande -->
+  <div id="lightbox">
+    <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
+    <img id="lightbox-img" src="">
+    <div class="controles-zoom">
+      <button class="btn-zoom" onclick="hacerZoom(0.3)">+</button>
+      <button class="btn-zoom" onclick="hacerZoom(-0.3)">-</button>
+    </div>
+  </div>
 
-    // Cargar fotos guardadas al abrir la página
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypYjYmus0LmLEJodt1orcd9xgP39C5pQT5ZUHEoGRPUOVmLm2KWoSHl_EzchXeueOc/exec';
+
+    // Función para iniciar la música y ocultar la bienvenida
+    function iniciarExperiencia() {
+      const musica = document.getElementById('musica-fondo');
+      const pantalla = document.getElementById('pantalla-bienvenida');
+      
+      musica.volume = 0.5; // Volumen al 50% para que no asuste
+      musica.play().catch(e => console.log("El navegador bloqueó el audio", e));
+      
+      pantalla.style.opacity = '0';
+      setTimeout(() => {
+        pantalla.style.display = 'none';
+        cargarFotos(); // Cargar las fotos una vez que entra
+      }, 800);
+    }
+
+    // Lógica del Visor (Lightbox) y Zoom
+    let nivelZoom = 1;
+    const imgLightbox = document.getElementById('lightbox-img');
+    const lightbox = document.getElementById('lightbox');
+
+    function abrirLightbox(url) {
+      imgLightbox.src = url;
+      nivelZoom = 1;
+      imgLightbox.style.transform = `scale(${nivelZoom})`;
+      lightbox.style.display = 'flex';
+    }
+
+    function cerrarLightbox() {
+      lightbox.style.display = 'none';
+    }
+
+    function hacerZoom(cambio) {
+      nivelZoom += cambio;
+      if (nivelZoom < 1) nivelZoom = 1; // No hacerla más pequeña que el original
+      if (nivelZoom > 4) nivelZoom = 4; // Límite máximo de acercamiento
+      imgLightbox.style.transform = `scale(${nivelZoom})`;
+    }
+
+    // Zoom con la rueda del ratón
+    imgLightbox.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const cambio = e.deltaY < 0 ? 0.2 : -0.2;
+      hacerZoom(cambio);
+    });
+
+    // Cargar fotos guardadas
     async function cargarFotos() {
       const container = document.getElementById('galleryContainer');
       const status = document.getElementById('loadingText');
@@ -133,35 +205,30 @@
           data.photos.reverse().forEach(photo => {
             const card = document.createElement('div');
             card.className = 'polaroid';
-            card.innerHTML = `<img src="${photo.url}" alt="Recuerdo" loading="lazy">`;
+            // Se agregó el evento onclick para abrir la foto en grande
+            card.innerHTML = `<img src="${photo.url}" alt="Recuerdo" loading="lazy" onclick="abrirLightbox('${photo.url}')">`;
             container.appendChild(card);
           });
         } else if (data.photos.length === 0) {
-          container.innerHTML = '<p>Aún no hay fotos. ¡Sé el primero en subir una!</p>';
+          container.innerHTML = '<p class="loading-spinner">Aún no hay fotos. ¡Sube la primera!</p>';
         }
       } catch (err) {
         if(status) status.innerText = 'Error al cargar las fotos. Intenta de nuevo.';
-        console.error(err);
       }
     }
 
-    // Subir una foto a Google Drive
+    // Subir foto a Drive
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
       const file = input.files[0];
       const status = document.getElementById('status');
-      status.innerText = '⏳ Subiendo foto a Drive... por favor espera.';
+      status.innerText = '⏳ Subiendo foto... por favor espera.';
 
       const reader = new FileReader();
       reader.onload = async function() {
         const base64String = reader.result.split(',')[1];
-        
-        const payload = {
-          fileName: file.name,
-          mimeType: file.type,
-          base64: base64String
-        };
+        const payload = { fileName: file.name, mimeType: file.type, base64: base64String };
 
         try {
           const response = await fetch(SCRIPT_URL, {
@@ -169,26 +236,20 @@
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
           });
-
           const result = await response.json();
           if (result.success) {
             status.innerText = '¡Foto subida con éxito! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
-            cargarFotos(); // Recargar la galería
+            cargarFotos();
           } else {
-            status.innerText = 'Ocurrió un error al subir la foto.';
+            status.innerText = 'Error al subir la foto.';
           }
         } catch (error) {
           status.innerText = 'Error de conexión al subir.';
-          console.error(error);
         }
       };
-
       reader.readAsDataURL(file);
     }
-
-    // Inicializar la carga al entrar
-    document.addEventListener('DOMContentLoaded', cargarFotos);
   </script>
 </body>
 </html>
