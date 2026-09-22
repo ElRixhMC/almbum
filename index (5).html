@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuestro album de Recuerdos ❤️</title>
+  <style>
+    :root {
+      --bg: #fff5f5;
+      --primary: #e63946;
+      --card-bg: #ffffff;
+      --text: #2b2d42;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+
+    .upload-btn {
+      background-color: var(--primary);
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      background-color: #d62828;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1100px;
+      margin-top: 20px;
+    }
+
+    /* Estilo Polaroid */
+    .polaroid {
+      background: var(--card-bg);
+      padding: 15px 15px 25px 15px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+      text-align: center;
+    }
+
+    .polaroid:hover {
+      transform: scale(1.03) rotate(1deg);
+    }
+
+    .polaroid img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+    }
+
+    .loading-spinner {
+      margin: 40px;
+      font-size: 18px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Nuestro album ❤️</h1>
+    <p>Un espacio para guardar todos nuestros momentos mi karisita</p>
+    
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+       Subir Nueva Foto
+    </button>
+    <input type="file" id="fileInput" accept="image/*" onchange="subirFoto(this)">
+    
+    <div id="status"></div>
+  </header>
+
+  <main class="gallery" id="galleryContainer">
+    <div class="loading-spinner" id="loadingText">Cargando nuestras fotos...</div>
+  </main>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBDikyaW1jNrXXEdHfQbwxeEvWNy0QApIvrEvmFQp1fWfo3XsjUT8LpWjb_40TzjL0/exec';
+
+    // Cargar fotos guardadas al abrir la página
+    async function cargarFotos() {
+      const container = document.getElementById('galleryContainer');
+      const status = document.getElementById('loadingText');
+
+      try {
+        const response = await fetch(SCRIPT_URL);
+        const data = await response.json();
+
+        if (data.success && data.photos.length > 0) {
+          container.innerHTML = '';
+          data.photos.reverse().forEach(photo => {
+            const card = document.createElement('div');
+            card.className = 'polaroid';
+            card.innerHTML = `<img src="${photo.url}" alt="Recuerdo" loading="lazy">`;
+            container.appendChild(card);
+          });
+        } else if (data.photos.length === 0) {
+          container.innerHTML = '<p>Aún no hay fotos. ¡Sé el primero en subir una!</p>';
+        }
+      } catch (err) {
+        if(status) status.innerText = 'Error al cargar las fotos. Intenta de nuevo.';
+        console.error(err);
+      }
+    }
+
+    // Subir una foto a Google Drive
+    async function subirFoto(input) {
+      if (!input.files || !input.files[0]) return;
+      
+      const file = input.files[0];
+      const status = document.getElementById('status');
+      status.innerText = '⏳ Subiendo foto a Drive... por favor espera.';
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        const base64String = reader.result.split(',')[1];
+        
+        const payload = {
+          fileName: file.name,
+          mimeType: file.type,
+          base64: base64String
+        };
+
+        try {
+          const response = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (result.success) {
+            status.innerText = '¡Foto subida con éxito! 🎉';
+            setTimeout(() => { status.innerText = ''; }, 3000);
+            cargarFotos(); // Recargar la galería
+          } else {
+            status.innerText = 'Ocurrió un error al subir la foto.';
+          }
+        } catch (error) {
+          status.innerText = 'Error de conexión al subir.';
+          console.error(error);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    }
+
+    // Inicializar la carga al entrar
+    document.addEventListener('DOMContentLoaded', cargarFotos);
+  </script>
+</body>
+</html>
