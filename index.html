@@ -10,14 +10,14 @@
   
   <style>
     :root {
-      --bg: #f4eee8; /* Fondo color crema/madera claro */
-      --primary: #8a1c31; /* Rojo vino romántico */
+      --bg: #f4eee8; 
+      --primary: #8a1c31; 
       --text: #2b2d42;
-      --page-bg: #fdf9f1; /* Papel viejo */
+      --page-bg: #fdf9f1; 
     }
 
     body {
-      font-family: 'Georgia', serif; /* Letra más clásica de álbum */
+      font-family: 'Georgia', serif; 
       background-color: var(--bg);
       color: var(--text);
       margin: 0; padding: 0;
@@ -51,24 +51,23 @@
     }
     .upload-btn:hover { transform: translateY(-2px); }
     #fileInput { display: none; }
-    #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; }
+    #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; font-weight: bold; }
 
     /* --- CONTENEDOR DEL LIBRO --- */
     .album-wrapper {
-      width: 100%; max-width: 900px;
+      width: 100%; max-width: 1000px;
+      height: 600px; /* ALTURA FIJA PARA EVITAR QUE EL MOTOR FALLE */
       display: flex; justify-content: center; align-items: center;
       margin-top: 20px; margin-bottom: 40px;
     }
     
-    /* Estilos internos de las páginas del libro */
     .page {
       background-color: var(--page-bg);
       color: #333;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.05); /* Sombra de papel */
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05); 
       overflow: hidden;
     }
     
-    /* Portadas duras */
     .page-cover {
       background-color: var(--primary);
       color: white;
@@ -78,7 +77,6 @@
     .page-cover h2 { font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center; margin: 0; }
     .page-cover p { font-size: 1.2rem; font-style: italic; opacity: 0.9; margin-top: 10px; }
     
-    /* Contenedor de la foto dentro de la página */
     .photo-container {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -87,8 +85,8 @@
     }
     .photo-container img {
       max-width: 90%; max-height: 80%;
-      border: 8px solid white; /* Borde tipo foto impresa */
-      border-bottom: 25px solid white; /* Efecto polaroid */
+      border: 8px solid white; 
+      border-bottom: 25px solid white; 
       box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
       cursor: zoom-in; transition: transform 0.2s;
     }
@@ -119,17 +117,15 @@
     }
     .btn-zoom:hover { background: rgba(255,255,255,0.5); }
     
-    .loading-spinner { font-family: 'Segoe UI', sans-serif; font-size: 18px; color: #888; margin-top: 50px; }
+    .loading-spinner { font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #d62828; margin-top: 20px; font-weight: bold; text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- Música de fondo -->
   <audio id="musica-fondo" loop>
     <source src="wonderwall.mp3" type="audio/mpeg">
   </audio>
 
-  <!-- Pantalla de bienvenida -->
   <div id="pantalla-bienvenida">
     <h1>Para Karissa ❤️</h1>
     <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center;">Nuestro pequeño espacio especial...</p>
@@ -145,13 +141,9 @@
     <div id="status"></div>
   </header>
 
-  <!-- Contenedor donde se creará el libro 3D -->
   <div id="loadingText" class="loading-spinner"></div>
-  <div class="album-wrapper" id="album-wrapper">
-    <!-- El libro se inyecta por JavaScript -->
-  </div>
+  <div class="album-wrapper" id="album-wrapper"></div>
 
-  <!-- Visor de fotos grande -->
   <div id="lightbox">
     <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
     <img id="lightbox-img" src="">
@@ -162,17 +154,14 @@
   </div>
 
   <script>
-    // TU URL DE APPS SCRIPT
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyBDikyaW1jNrXXEdHfQbwxeEvWNy0QApIvrEvmFQp1fWfo3XsjUT8LpWjb_40TzjL0/exec';
-    
-    let albumFlip = null; // Variable para guardar el libro animado
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypYjYmus0LmLEJodt1orcd9xgP39C5pQT5ZUHEoGRPUOVmLm2KWoSHl_EzchXeueOc/exec';
+    let albumFlip = null; 
 
-    // --- MÚSICA Y BIENVENIDA ---
     function iniciarExperiencia() {
       const musica = document.getElementById('musica-fondo');
       const pantalla = document.getElementById('pantalla-bienvenida');
       musica.volume = 0.5; 
-      musica.play().catch(e => console.log("Bloqueo de audio", e));
+      musica.play().catch(e => console.log("Bloqueo de audio"));
       
       pantalla.style.opacity = '0';
       setTimeout(() => {
@@ -182,15 +171,12 @@
       }, 800);
     }
 
-    // --- VISOR Y ZOOM ---
     let nivelZoom = 1;
     const imgLightbox = document.getElementById('lightbox-img');
     const lightbox = document.getElementById('lightbox');
 
     function abrirLightbox(event, url) {
-      // Evita que el libro pase de página cuando haces clic en la foto
       event.stopPropagation(); 
-      
       imgLightbox.src = url;
       nivelZoom = 1;
       imgLightbox.style.transform = `scale(${nivelZoom})`;
@@ -209,7 +195,6 @@
       hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
     });
 
-    // --- CARGAR Y CONSTRUIR EL LIBRO ---
     async function cargarFotos() {
       const wrapper = document.getElementById('album-wrapper');
       const statusText = document.getElementById('loadingText');
@@ -220,7 +205,6 @@
 
         statusText.style.display = 'none';
         
-        // Destruir libro anterior si se está recargando después de subir foto
         if (albumFlip) { albumFlip.destroy(); }
         wrapper.innerHTML = '<div id="book"></div>';
         const bookDiv = document.getElementById('book');
@@ -246,18 +230,17 @@
             `;
           });
 
-          // Asegurar que haya un número par de páginas internas para que cierre bien
+          // Ajuste de páginas pares
           if (data.photos.length % 2 !== 0) {
             bookDiv.innerHTML += `
               <div class="page">
                 <div class="photo-container">
-                  <p style="color:#aaa; font-style:italic;">Esperando nuestro próximo recuerdo...</p>
+                  <p style="color:#aaa; font-style:italic; text-align:center;">Esperando nuestro próximo recuerdo...</p>
                 </div>
               </div>
             `;
           }
         } else {
-          // Si no hay fotos, ponemos un par de páginas en blanco
           bookDiv.innerHTML += `
             <div class="page"><div class="photo-container"><p>Aún no hay fotos.</p></div></div>
             <div class="page"><div class="photo-container"><p>¡Sube la primera arriba!</p></div></div>
@@ -272,36 +255,36 @@
           </div>
         `;
 
-        // INICIALIZAR LA ANIMACIÓN 3D DEL LIBRO
+        // Validar que la librería se haya descargado bien
+        if (typeof StPageFlip === 'undefined') {
+            throw new Error("El motor del libro 3D no pudo cargar. Revisa si hay un bloqueador de anuncios activo.");
+        }
+
+        // INICIALIZAR EL LIBRO (Ajustado para no fallar)
         albumFlip = new StPageFlip.PageFlip(document.getElementById('book'), {
-          width: 400,          // Ancho base
-          height: 500,         // Alto base
-          size: "stretch",     // Se adapta al celular/pantalla
-          minWidth: 315,
-          maxWidth: 500,
-          minHeight: 420,
-          maxHeight: 600,
-          maxShadowOpacity: 0.5,
-          showCover: true,     // Portada dura activada
-          mobileScrollSupport: false // Previene problemas al hacer scroll en celular
+          width: 400,          
+          height: 500,         
+          size: "fixed",       // Cambiado a fixed para estabilidad
+          showCover: true,     
+          usePortrait: true,   // Clave: en celulares se ve de 1 hoja, en PC de 2 hojas
+          maxShadowOpacity: 0.4
         });
 
-        // Cargar el HTML que acabamos de inyectar
         albumFlip.loadFromHTML(document.querySelectorAll('.page'));
 
       } catch (err) {
-        statusText.innerText = 'Error al cargar el álbum. Intenta de nuevo.';
+        statusText.innerText = '❌ Error al animar el libro: ' + err.message;
         statusText.style.display = 'block';
         console.error(err);
       }
     }
 
-    // --- SUBIR FOTOS ---
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
       const file = input.files[0];
       const status = document.getElementById('status');
+      status.style.color = "#8a1c31";
       status.innerText = '⏳ Revelando foto y pegándola en el álbum...';
 
       const reader = new FileReader();
@@ -317,18 +300,20 @@
           });
           const result = await response.json();
           if (result.success) {
+            status.style.color = "green";
             status.innerText = '¡Foto añadida al álbum! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
             
-            // Recargar el libro completo con la nueva foto
             document.getElementById('album-wrapper').innerHTML = '';
             document.getElementById('loadingText').innerText = 'Actualizando el álbum...';
             document.getElementById('loadingText').style.display = 'block';
             cargarFotos();
           } else {
+            status.style.color = "red";
             status.innerText = 'Error al subir la foto.';
           }
         } catch (error) {
+          status.style.color = "red";
           status.innerText = 'Error de conexión.';
         }
       };
