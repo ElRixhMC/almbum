@@ -81,7 +81,7 @@
     .page-content {
       width: 100%; height: 100%;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      padding: 20px; box-sizing: border-box;
+      padding: 15px; box-sizing: border-box;
       background-image: radial-gradient(circle, #fff 0%, var(--page-bg) 100%);
     }
 
@@ -98,7 +98,6 @@
       display: none; /* Oculto por defecto */
       width: 90%; max-width: 1000px;
       margin: 30px auto;
-      display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 25px;
       padding-bottom: 50px;
@@ -118,18 +117,21 @@
       margin-top: 15px; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #555;
     }
 
-    /* Imágenes tipo Polaroid dentro del libro */
+    /* Imágenes tipo Polaroid dentro del libro con tamaño controlado */
     .page-content img {
-      max-width: 90%; max-height: 70%;
+      width: 220px;
+      height: 250px;
+      object-fit: cover;
+      background-color: #fff;
       border: 8px solid white; 
-      border-bottom: 25px solid white; 
+      border-bottom: 30px solid white; 
       box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
     }
 
     .btn-ver {
-      margin-top: 15px; background-color: transparent; border: 1px solid var(--primary);
-      color: var(--primary); padding: 5px 15px; border-radius: 15px;
-      cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 13px;
+      margin-top: 12px; background-color: transparent; border: 1px solid var(--primary);
+      color: var(--primary); padding: 5px 12px; border-radius: 15px;
+      cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 12px;
       transition: 0.3s;
     }
     .btn-ver:hover { background-color: var(--primary); color: white; }
@@ -204,7 +206,7 @@
 
   <script>
     // ⚠️ REEMPLAZA ESTO CON TU ENLACE DE GOOGLE APPS SCRIPT
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyzU--QPBpBokiHUPavDh3ikPaNmtxgMzX6gP5y4mT_Do9Vx8Xkq7PPd0ZIHFVRumKI/exec'; 
+    const SCRIPT_URL = 'AQUI_VA_TU_ENLACE'; 
     
     let albumFlip = null; 
     let cacheFotos = [];  
@@ -266,19 +268,17 @@
       hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
     });
 
-    // 🟢 CARGAR FOTOS CORREGIDO PARA EVITAR EL ERROR DE HTML
     async function cargarFotos() {
       const statusText = document.getElementById('loadingText');
 
       try {
         const response = await fetch(SCRIPT_URL);
-        const textResponse = await response.text(); // Leemos como texto primero
+        const textResponse = await response.text();
 
         let data;
         try {
-          data = JSON.parse(textResponse); // Intentamos convertirlo a JSON
+          data = JSON.parse(textResponse);
         } catch (e) {
-          // Si falla, significa que Google devolvió HTML (error de despliegue, URL mal escrita o permisos)
           console.error("Respuesta HTML recibida:", textResponse);
           throw new Error("El script devolvió HTML en lugar de JSON. Revisa que tu SCRIPT_URL sea correcta y que la aplicación web esté desplegada públicamente ('Cualquier usuario').");
         }
@@ -395,7 +395,6 @@
       galleryContainer.innerHTML = html;
     }
 
-    // 🟢 SUBIR FOTO CORREGIDO PARA VALIDAR RESPUESTAS SEGURAS
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
