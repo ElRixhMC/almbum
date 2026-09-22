@@ -3,78 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nuestra Album de Recuerdos ❤️</title>
+  <title>Nuestro Álbum ❤️</title>
+  
+  <!-- Librería para el efecto realista del libro -->
+  <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+  
   <style>
     :root {
-      --bg: #fff5f5;
-      --primary: #e63946;
-      --card-bg: #ffffff;
+      --bg: #f4eee8; /* Fondo color crema/madera claro */
+      --primary: #8a1c31; /* Rojo vino romántico */
       --text: #2b2d42;
+      --page-bg: #fdf9f1; /* Papel viejo */
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Georgia', serif; /* Letra más clásica de álbum */
       background-color: var(--bg);
       color: var(--text);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* Evitar scroll si la pantalla de bienvenida está activa */
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; align-items: center;
       overflow-x: hidden; 
     }
 
     /* --- PANTALLA DE BIENVENIDA --- */
     #pantalla-bienvenida {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-color: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-color: var(--bg); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 2000;
       transition: opacity 0.8s ease;
     }
-    #pantalla-bienvenida h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; text-align: center; padding: 0 20px;}
+    #pantalla-bienvenida h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; text-align: center; }
     .btn-entrar {
       background-color: var(--primary); color: white; padding: 15px 30px;
       border: none; border-radius: 30px; font-size: 18px; cursor: pointer;
-      box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4); transition: transform 0.3s;
+      box-shadow: 0 4px 15px rgba(138, 28, 49, 0.4); transition: transform 0.3s;
+      font-family: 'Segoe UI', sans-serif;
     }
     .btn-entrar:hover { transform: scale(1.05); }
 
-    header { text-align: center; margin-top: 30px; margin-bottom: 30px; }
-    h1 { color: var(--primary); margin-bottom: 10px; }
-
+    /* --- ENCABEZADO --- */
+    header { text-align: center; margin-top: 20px; font-family: 'Segoe UI', sans-serif; }
+    h1 { color: var(--primary); margin-bottom: 5px; font-family: 'Georgia', serif; }
     .upload-btn {
-      background-color: var(--primary); color: white; padding: 12px 24px;
-      border: none; border-radius: 25px; font-size: 16px; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3); transition: transform 0.2s;
+      background-color: var(--primary); color: white; padding: 10px 20px;
+      border: none; border-radius: 25px; font-size: 15px; cursor: pointer;
+      box-shadow: 0 4px 10px rgba(138, 28, 49, 0.3); transition: transform 0.2s; margin-top: 10px;
     }
     .upload-btn:hover { transform: translateY(-2px); }
     #fileInput { display: none; }
-    #status { margin-top: 15px; font-size: 14px; color: #666; }
+    #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; }
 
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 25px; width: 100%; max-width: 1100px; padding: 20px; box-sizing: border-box;
+    /* --- CONTENEDOR DEL LIBRO --- */
+    .album-wrapper {
+      width: 100%; max-width: 900px;
+      display: flex; justify-content: center; align-items: center;
+      margin-top: 20px; margin-bottom: 40px;
     }
+    
+    /* Estilos internos de las páginas del libro */
+    .page {
+      background-color: var(--page-bg);
+      color: #333;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05); /* Sombra de papel */
+      overflow: hidden;
+    }
+    
+    /* Portadas duras */
+    .page-cover {
+      background-color: var(--primary);
+      color: white;
+      border: 2px solid #5a1220;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+    }
+    .page-cover h2 { font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center; margin: 0; }
+    .page-cover p { font-size: 1.2rem; font-style: italic; opacity: 0.9; margin-top: 10px; }
+    
+    /* Contenedor de la foto dentro de la página */
+    .photo-container {
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 20px; box-sizing: border-box;
+      background-image: radial-gradient(circle, #fff 0%, var(--page-bg) 100%);
+    }
+    .photo-container img {
+      max-width: 90%; max-height: 80%;
+      border: 8px solid white; /* Borde tipo foto impresa */
+      border-bottom: 25px solid white; /* Efecto polaroid */
+      box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
+      cursor: zoom-in; transition: transform 0.2s;
+    }
+    .photo-container img:hover { transform: scale(1.02); }
 
-    .polaroid {
-      background: var(--card-bg); padding: 15px 15px 25px 15px;
-      border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease; text-align: center; cursor: pointer;
-    }
-    .polaroid:hover { transform: scale(1.03) rotate(1deg); }
-    .polaroid img {
-      width: 100%; height: 220px; object-fit: cover;
-      border-radius: 4px; background-color: #f0f0f0;
-    }
-
-    /* --- VISOR DE IMAGEN (LIGHTBOX) --- */
+    /* --- VISOR (LIGHTBOX) --- */
     #lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.9); z-index: 3000;
@@ -82,7 +102,7 @@
     }
     #lightbox-img {
       max-width: 90%; max-height: 80vh; transition: transform 0.2s ease-out;
-      border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
     .cerrar-lightbox {
       position: absolute; top: 20px; right: 30px; font-size: 40px;
@@ -99,39 +119,37 @@
     }
     .btn-zoom:hover { background: rgba(255,255,255,0.5); }
     
-    .loading-spinner { margin: 40px auto; font-size: 18px; color: #888; text-align: center; grid-column: 1 / -1; }
+    .loading-spinner { font-family: 'Segoe UI', sans-serif; font-size: 18px; color: #888; margin-top: 50px; }
   </style>
 </head>
 <body>
 
-  <!-- Música de fondo (debe estar en la misma carpeta que el archivo HTML) -->
+  <!-- Música de fondo -->
   <audio id="musica-fondo" loop>
     <source src="wonderwall.mp3" type="audio/mpeg">
-    Tu navegador no soporta el elemento de audio.
   </audio>
 
   <!-- Pantalla de bienvenida -->
   <div id="pantalla-bienvenida">
-    <h1>Richi y Kari ❤️</h1>
-    <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center; padding: 0 15px;">Tengo algo especial preparado para nosotros...</p>
-    <button class="btn-entrar" onclick="iniciarExperiencia()">Abrir Galería</button>
+    <h1>Para Karissa ❤️</h1>
+    <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center;">Nuestro pequeño espacio especial...</p>
+    <button class="btn-entrar" onclick="iniciarExperiencia()">Abrir el Álbum ✨</button>
   </div>
 
   <header>
-    <h1>Nuestra Galería ❤️</h1>
-    <p>Un espacio para guardar todos nuestros momentos</p>
-    
+    <h1>Nuestro Álbum</h1>
     <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
-       Subir Nueva Foto
+      + Añadir un recuerdo
     </button>
     <input type="file" id="fileInput" accept="image/*" onchange="subirFoto(this)">
-    
     <div id="status"></div>
   </header>
 
-  <main class="gallery" id="galleryContainer">
-    <div class="loading-spinner" id="loadingText">Cargando nuestras fotos...</div>
-  </main>
+  <!-- Contenedor donde se creará el libro 3D -->
+  <div id="loadingText" class="loading-spinner"></div>
+  <div class="album-wrapper" id="album-wrapper">
+    <!-- El libro se inyecta por JavaScript -->
+  </div>
 
   <!-- Visor de fotos grande -->
   <div id="lightbox">
@@ -144,86 +162,147 @@
   </div>
 
   <script>
+    // TU URL DE APPS SCRIPT
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbypYjYmus0LmLEJodt1orcd9xgP39C5pQT5ZUHEoGRPUOVmLm2KWoSHl_EzchXeueOc/exec';
+    
+    let albumFlip = null; // Variable para guardar el libro animado
 
-    // Función para iniciar la música y ocultar la bienvenida
+    // --- MÚSICA Y BIENVENIDA ---
     function iniciarExperiencia() {
       const musica = document.getElementById('musica-fondo');
       const pantalla = document.getElementById('pantalla-bienvenida');
-      
-      musica.volume = 0.5; // Volumen al 50% para que no asuste
-      musica.play().catch(e => console.log("El navegador bloqueó el audio", e));
+      musica.volume = 0.5; 
+      musica.play().catch(e => console.log("Bloqueo de audio", e));
       
       pantalla.style.opacity = '0';
       setTimeout(() => {
         pantalla.style.display = 'none';
-        cargarFotos(); // Cargar las fotos una vez que entra
+        document.getElementById('loadingText').innerText = '⏳ Desempolvando nuestro álbum...';
+        cargarFotos(); 
       }, 800);
     }
 
-    // Lógica del Visor (Lightbox) y Zoom
+    // --- VISOR Y ZOOM ---
     let nivelZoom = 1;
     const imgLightbox = document.getElementById('lightbox-img');
     const lightbox = document.getElementById('lightbox');
 
-    function abrirLightbox(url) {
+    function abrirLightbox(event, url) {
+      // Evita que el libro pase de página cuando haces clic en la foto
+      event.stopPropagation(); 
+      
       imgLightbox.src = url;
       nivelZoom = 1;
       imgLightbox.style.transform = `scale(${nivelZoom})`;
       lightbox.style.display = 'flex';
     }
 
-    function cerrarLightbox() {
-      lightbox.style.display = 'none';
-    }
-
+    function cerrarLightbox() { lightbox.style.display = 'none'; }
     function hacerZoom(cambio) {
       nivelZoom += cambio;
-      if (nivelZoom < 1) nivelZoom = 1; // No hacerla más pequeña que el original
-      if (nivelZoom > 4) nivelZoom = 4; // Límite máximo de acercamiento
+      if (nivelZoom < 1) nivelZoom = 1; 
+      if (nivelZoom > 4) nivelZoom = 4;
       imgLightbox.style.transform = `scale(${nivelZoom})`;
     }
-
-    // Zoom con la rueda del ratón
     imgLightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
-      const cambio = e.deltaY < 0 ? 0.2 : -0.2;
-      hacerZoom(cambio);
+      hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
     });
 
-    // Cargar fotos guardadas
+    // --- CARGAR Y CONSTRUIR EL LIBRO ---
     async function cargarFotos() {
-      const container = document.getElementById('galleryContainer');
-      const status = document.getElementById('loadingText');
+      const wrapper = document.getElementById('album-wrapper');
+      const statusText = document.getElementById('loadingText');
 
       try {
         const response = await fetch(SCRIPT_URL);
         const data = await response.json();
 
-        if (data.success && data.photos.length > 0) {
-          container.innerHTML = '';
+        statusText.style.display = 'none';
+        
+        // Destruir libro anterior si se está recargando después de subir foto
+        if (albumFlip) { albumFlip.destroy(); }
+        wrapper.innerHTML = '<div id="book"></div>';
+        const bookDiv = document.getElementById('book');
+
+        // 1. Portada delantera
+        bookDiv.innerHTML += `
+          <div class="page page-cover">
+            <h2>Nuestro Álbum</h2>
+            <p>Karissa & Yo ❤️</p>
+            <span style="font-size: 0.8rem; margin-top: 40px; opacity: 0.6;">(Arrastra la esquina o haz clic)</span>
+          </div>
+        `;
+
+        // 2. Páginas interiores (Fotos)
+        if (data.photos && data.photos.length > 0) {
           data.photos.reverse().forEach(photo => {
-            const card = document.createElement('div');
-            card.className = 'polaroid';
-            // Se agregó el evento onclick para abrir la foto en grande
-            card.innerHTML = `<img src="${photo.url}" alt="Recuerdo" loading="lazy" onclick="abrirLightbox('${photo.url}')">`;
-            container.appendChild(card);
+            bookDiv.innerHTML += `
+              <div class="page">
+                <div class="photo-container">
+                  <img src="${photo.url}" alt="Recuerdo" onclick="abrirLightbox(event, '${photo.url}')">
+                </div>
+              </div>
+            `;
           });
-        } else if (data.photos.length === 0) {
-          container.innerHTML = '<p class="loading-spinner">Aún no hay fotos. ¡Sube la primera!</p>';
+
+          // Asegurar que haya un número par de páginas internas para que cierre bien
+          if (data.photos.length % 2 !== 0) {
+            bookDiv.innerHTML += `
+              <div class="page">
+                <div class="photo-container">
+                  <p style="color:#aaa; font-style:italic;">Esperando nuestro próximo recuerdo...</p>
+                </div>
+              </div>
+            `;
+          }
+        } else {
+          // Si no hay fotos, ponemos un par de páginas en blanco
+          bookDiv.innerHTML += `
+            <div class="page"><div class="photo-container"><p>Aún no hay fotos.</p></div></div>
+            <div class="page"><div class="photo-container"><p>¡Sube la primera arriba!</p></div></div>
+          `;
         }
+
+        // 3. Portada trasera
+        bookDiv.innerHTML += `
+          <div class="page page-cover">
+            <h2>Fin</h2>
+            <p>Por ahora...</p>
+          </div>
+        `;
+
+        // INICIALIZAR LA ANIMACIÓN 3D DEL LIBRO
+        albumFlip = new StPageFlip.PageFlip(document.getElementById('book'), {
+          width: 400,          // Ancho base
+          height: 500,         // Alto base
+          size: "stretch",     // Se adapta al celular/pantalla
+          minWidth: 315,
+          maxWidth: 500,
+          minHeight: 420,
+          maxHeight: 600,
+          maxShadowOpacity: 0.5,
+          showCover: true,     // Portada dura activada
+          mobileScrollSupport: false // Previene problemas al hacer scroll en celular
+        });
+
+        // Cargar el HTML que acabamos de inyectar
+        albumFlip.loadFromHTML(document.querySelectorAll('.page'));
+
       } catch (err) {
-        if(status) status.innerText = 'Error al cargar las fotos. Intenta de nuevo.';
+        statusText.innerText = 'Error al cargar el álbum. Intenta de nuevo.';
+        statusText.style.display = 'block';
+        console.error(err);
       }
     }
 
-    // Subir foto a Drive
+    // --- SUBIR FOTOS ---
     async function subirFoto(input) {
       if (!input.files || !input.files[0]) return;
       
       const file = input.files[0];
       const status = document.getElementById('status');
-      status.innerText = '⏳ Subiendo foto... por favor espera.';
+      status.innerText = '⏳ Revelando foto y pegándola en el álbum...';
 
       const reader = new FileReader();
       reader.onload = async function() {
@@ -238,14 +317,19 @@
           });
           const result = await response.json();
           if (result.success) {
-            status.innerText = '¡Foto subida con éxito! 🎉';
+            status.innerText = '¡Foto añadida al álbum! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
+            
+            // Recargar el libro completo con la nueva foto
+            document.getElementById('album-wrapper').innerHTML = '';
+            document.getElementById('loadingText').innerText = 'Actualizando el álbum...';
+            document.getElementById('loadingText').style.display = 'block';
             cargarFotos();
           } else {
             status.innerText = 'Error al subir la foto.';
           }
         } catch (error) {
-          status.innerText = 'Error de conexión al subir.';
+          status.innerText = 'Error de conexión.';
         }
       };
       reader.readAsDataURL(file);
