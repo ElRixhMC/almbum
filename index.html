@@ -99,10 +99,13 @@
       color: white;
     }
     
-    /* Imagen de portada limpia a pantalla completa */
+    /* Ajuste para mostrar la portada completa sin recortes */
     .cover-content {
       padding: 0 !important;
-      background: url('portada.jpg') center/cover no-repeat;
+      background-image: url('portada.png');
+      background-position: center;
+      background-size: 100% 100%; /* Ajusta la imagen completa a los bordes de la página */
+      background-repeat: no-repeat;
       width: 100%;
       height: 100%;
     }
@@ -429,7 +432,7 @@
 
       let htmlContent = '';
 
-      // PORTADA (Solo muestra la imagen sin texto superpuesto)
+      // PORTADA
       htmlContent += `
         <div class="page page-cover" data-density="hard">
           <div class="page-content cover-content"></div>
