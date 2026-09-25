@@ -97,12 +97,18 @@
     .page-cover {
       background-color: var(--primary);
       color: white;
-      border: 3px solid #5a1220;
     }
     
-    /* Portada ajustada para incluir portada.png con respaldo de degradado */
+    /* Imagen de portada limpia a pantalla completa */
     .cover-content {
-      background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('portada.png') center/cover no-repeat, linear-gradient(135deg, #8a1c31 0%, #5a1220 100%);
+      padding: 0 !important;
+      background: url('portada.jpg') center/cover no-repeat;
+      width: 100%;
+      height: 100%;
+    }
+
+    .back-cover-content {
+      background: linear-gradient(135deg, #8a1c31 0%, #5a1220 100%);
       padding: 20px;
     }
     
@@ -113,32 +119,22 @@
       text-align: center;
       width: 100%;
       background: rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(2px);
     }
     .cover-frame h2 { 
       font-size: 2.2rem; 
       margin: 0; 
       color: #fff; 
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.6); 
     }
     .cover-sub { 
       font-size: 1.2rem; 
       margin-top: 15px; 
       font-style: italic; 
       color: #ffd1d9; 
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
-    }
-    .cover-footer { 
-      font-size: 0.8rem; 
-      margin-top: 30px; 
-      opacity: 0.9; 
-      text-transform: uppercase; 
-      letter-spacing: 1px; 
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
     }
     
-    /* Imágenes adaptables con marco Polaroid dinámico */
-    .page-content img {
+    /* Imágenes y videos adaptables con marco Polaroid dinámico */
+    .page-content img,
+    .page-content video {
       max-width: 85%;
       max-height: 70%;
       width: auto;
@@ -175,7 +171,8 @@
       transition: transform 0.3s, box-shadow 0.3s;
     }
     .polaroid-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .polaroid-card img {
+    .polaroid-card img,
+    .polaroid-card video {
       width: 100%; height: 260px; object-fit: cover; border-radius: 2px;
       cursor: pointer;
     }
@@ -193,6 +190,9 @@
     #lightbox-img {
       max-width: 90%; max-height: 80vh; transition: transform 0.2s ease-out;
       border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    #lightbox-video {
+      max-width: 90%; max-height: 80vh; border-radius: 4px; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: none;
     }
     .cerrar-lightbox {
       position: absolute; top: 20px; right: 30px; font-size: 40px;
@@ -214,7 +214,7 @@
 
     @media (max-width: 600px) {
       #book-container { height: 420px; }
-      .page-content img { max-width: 85%; max-height: 65%; }
+      .page-content img, .page-content video { max-width: 85%; max-height: 65%; }
     }
   </style>
 </head>
@@ -233,10 +233,10 @@
   <header>
     <h1>Nuestro Álbum</h1>
     <div class="acciones-header">
-      <button class="btn-accion" id="btnSubirFoto" onclick="document.getElementById('fileInput').click()">+ Añadir foto</button>
+      <button class="btn-accion" id="btnSubirFoto" onclick="document.getElementById('fileInput').click()">+ Añadir foto o video</button>
       <button class="btn-accion btn-secundario" id="btnCambiarVista" onclick="alternarVista()">Ver en Galería</button>
     </div>
-    <input type="file" id="fileInput" accept="image/*" onchange="subirFoto(this)">
+    <input type="file" id="fileInput" accept="image/*,video/*" onchange="subirFoto(this)">
     <div id="status"></div>
   </header>
 
@@ -254,7 +254,8 @@
   <div id="lightbox">
     <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
     <img id="lightbox-img" src="" alt="Vista ampliada">
-    <div class="controles-zoom">
+    <video id="lightbox-video" src="" controls></video>
+    <div class="controles-zoom" id="controles-zoom">
       <button class="btn-zoom" onclick="hacerZoom(0.3)">+</button>
       <button class="btn-zoom" onclick="hacerZoom(-0.3)">-</button>
     </div>
@@ -267,8 +268,14 @@
     let cacheFotos = [];  
     let modoLibroActivo = true;
 
+    function esMediaVideo(item) {
+      if (item.mimeType && item.mimeType.startsWith('video/')) return true;
+      if (item.isVideo) return true;
+      if (item.url && item.url.match(/\.(mp4|webm|ogg|mov|m4v)(\?.*)?$/i)) return true;
+      return false;
+    }
+
     function iniciarExperiencia() {
-      // Activar pantalla completa automáticamente
       if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen().catch(e => console.log("Pantalla completa bloqueada por el navegador:", e));
       } else if (document.documentElement.webkitRequestFullscreen) {
@@ -314,21 +321,40 @@
 
     let nivelZoom = 1;
     const imgLightbox = document.getElementById('lightbox-img');
+    const videoLightbox = document.getElementById('lightbox-video');
+    const controlesZoom = document.getElementById('controles-zoom');
     const lightbox = document.getElementById('lightbox');
 
-    function abrirLightbox(url) {
-      imgLightbox.src = url;
-      nivelZoom = 1;
-      imgLightbox.style.transform = `scale(${nivelZoom})`;
+    function abrirLightbox(url, esVideo = false) {
+      if (esVideo) {
+        imgLightbox.style.display = 'none';
+        controlesZoom.style.display = 'none';
+        videoLightbox.style.display = 'block';
+        videoLightbox.src = url;
+        videoLightbox.play().catch(e => console.log(e));
+      } else {
+        videoLightbox.style.display = 'none';
+        videoLightbox.pause();
+        videoLightbox.src = '';
+        
+        imgLightbox.style.display = 'block';
+        controlesZoom.style.display = 'flex';
+        imgLightbox.src = url;
+        nivelZoom = 1;
+        imgLightbox.style.transform = `scale(${nivelZoom})`;
+      }
       lightbox.style.display = 'flex';
     }
 
     function cerrarLightbox() { 
       lightbox.style.display = 'none'; 
       imgLightbox.src = '';
+      videoLightbox.pause();
+      videoLightbox.src = '';
     }
 
     function hacerZoom(cambio) {
+      if (imgLightbox.style.display === 'none') return;
       nivelZoom += cambio;
       if (nivelZoom < 1) nivelZoom = 1; 
       if (nivelZoom > 4) nivelZoom = 4;
@@ -389,7 +415,6 @@
     function renderizarLibro() {
       const bookContainer = document.getElementById('book-container');
 
-      // 1. Destruir objeto previo si existe
       if (albumFlip) {
         try {
           albumFlip.destroy();
@@ -399,32 +424,31 @@
         albumFlip = null;
       }
 
-      // 2. Recrear completamente el div #book para borrar envoltorios previos
       bookContainer.innerHTML = '<div id="book"></div>';
       const bookWrapper = document.getElementById('book');
 
       let htmlContent = '';
 
-      // PORTADA
+      // PORTADA (Solo muestra la imagen sin texto superpuesto)
       htmlContent += `
         <div class="page page-cover" data-density="hard">
-          <div class="page-content cover-content">
-            <div class="cover-frame">
-              <h2>Nuestro Álbum</h2>
-              <div class="cover-sub">Richi y Kari ❤️</div>
-              <div class="cover-footer">Usa las flechas o arrastra para ojear</div>
-            </div>
-          </div>
+          <div class="page-content cover-content"></div>
         </div>
       `;
 
       if (cacheFotos.length > 0) {
         [...cacheFotos].reverse().forEach(photo => {
+          const esVid = esMediaVideo(photo);
+          const mediaTag = esVid 
+            ? `<video src="${photo.url}" controls playsinline preload="metadata"></video>`
+            : `<img src="${photo.url}" alt="Recuerdo">`;
+          const textoBoton = esVid ? 'Ver video en grande' : 'Ver foto en grande';
+
           htmlContent += `
             <div class="page">
               <div class="page-content">
-                <img src="${photo.url}" alt="Recuerdo">
-                <button class="btn-ver" onclick="abrirLightbox('${photo.url}')">Ver foto en grande</button>
+                ${mediaTag}
+                <button class="btn-ver" onclick="abrirLightbox('${photo.url}', ${esVid})">${textoBoton}</button>
               </div>
             </div>
           `;
@@ -441,15 +465,15 @@
         }
       } else {
         htmlContent += `
-          <div class="page"><div class="page-content"><p>Aún no hay fotos.</p></div></div>
-          <div class="page"><div class="page-content"><p>¡Sube la primera!</p></div></div>
+          <div class="page"><div class="page-content"><p>Aún no hay elementos.</p></div></div>
+          <div class="page"><div class="page-content"><p>¡Sube el primero!</p></div></div>
         `;
       }
 
       // CONTRAPORTADA
       htmlContent += `
         <div class="page page-cover" data-density="hard">
-          <div class="page-content cover-content">
+          <div class="page-content back-cover-content">
             <div class="cover-frame">
               <h2>Fin</h2>
               <div class="cover-sub">Continuará...</div>
@@ -460,7 +484,6 @@
 
       bookWrapper.innerHTML = htmlContent;
 
-      // 3. Esperar el renderizado visual antes de inicializar PageFlip
       requestAnimationFrame(() => {
         setTimeout(() => {
           const el = document.getElementById('book');
@@ -491,15 +514,20 @@
 
       if (cacheFotos.length > 0) {
         [...cacheFotos].reverse().forEach(photo => {
+          const esVid = esMediaVideo(photo);
+          const mediaTag = esVid
+            ? `<video src="${photo.url}" controls playsinline preload="metadata"></video>`
+            : `<img src="${photo.url}" alt="Recuerdo" onclick="abrirLightbox('${photo.url}', false)">`;
+
           html += `
             <div class="polaroid-card">
-              <img src="${photo.url}" alt="Recuerdo" onclick="abrirLightbox('${photo.url}')">
+              ${mediaTag}
               <span>❤️ ${photo.name || 'Recuerdo'}</span>
             </div>
           `;
         });
       } else {
-        html = '<p style="text-align:center; grid-column: 1/-1; color: #666;">Aún no hay fotos en el álbum. ¡Sube la primera!</p>';
+        html = '<p style="text-align:center; grid-column: 1/-1; color: #666;">Aún no hay contenido en el álbum. ¡Sube el primero!</p>';
       }
 
       galleryContainer.innerHTML = html;
@@ -513,7 +541,7 @@
       const btnSubir = document.getElementById('btnSubirFoto');
 
       status.style.color = "#8a1c31";
-      status.innerText = '⏳ Subiendo foto al álbum...';
+      status.innerText = '⏳ Subiendo archivo al álbum...';
       if (btnSubir) btnSubir.disabled = true;
 
       const reader = new FileReader();
@@ -533,12 +561,12 @@
           try {
             result = JSON.parse(textResponse);
           } catch (e) {
-            throw new Error("El servidor devolvió HTML al intentar subir la foto.");
+            throw new Error("El servidor devolvió HTML al intentar subir el archivo.");
           }
 
           if (result.success) {
             status.style.color = "green";
-            status.innerText = '¡Foto añadida con éxito! 🎉';
+            status.innerText = '¡Archivo añadido con éxito! 🎉';
             setTimeout(() => { status.innerText = ''; }, 3000);
             
             document.getElementById('loadingText').innerText = 'Actualizando álbum...';
@@ -546,7 +574,7 @@
             cargarFotos();
           } else {
             status.style.color = "red";
-            status.innerText = 'Error al subir la foto.';
+            status.innerText = 'Error al subir el archivo.';
           }
         } catch (error) {
           status.style.color = "red";
