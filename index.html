@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nuestro Álbum ❤️</title>
+  <title>Album de Richi y Kari ❤️</title>
   
   <!-- Librería del motor de libro 3D -->
   <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
@@ -16,6 +16,10 @@
       --page-bg: #fdf9f1; 
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Georgia', serif; 
       background-color: var(--bg);
@@ -23,6 +27,7 @@
       margin: 0; padding: 0;
       display: flex; flex-direction: column; align-items: center;
       overflow-x: hidden; 
+      min-height: 100vh;
     }
 
     /* --- PANTALLA DE BIENVENIDA --- */
@@ -31,18 +36,19 @@
       background-color: var(--bg); display: flex; flex-direction: column;
       align-items: center; justify-content: center; z-index: 2000;
       transition: opacity 0.8s ease;
+      padding: 20px;
     }
-    #pantalla-bienvenida h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 20px; text-align: center; }
+    #pantalla-bienvenida h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; text-align: center; }
     .btn-entrar {
       background-color: var(--primary); color: white; padding: 15px 30px;
       border: none; border-radius: 30px; font-size: 18px; cursor: pointer;
-      box-shadow: 0 4px 15px rgba(138, 28, 49, 0.4); transition: transform 0.3s;
+      box-shadow: 0 4px 15px rgba(138, 28, 49, 0.4); transition: transform 0.3s, background-color 0.3s;
       font-family: 'Segoe UI', sans-serif;
     }
     .btn-entrar:hover { transform: scale(1.05); }
 
     /* --- ENCABEZADO --- */
-    header { text-align: center; margin-top: 20px; font-family: 'Segoe UI', sans-serif; }
+    header { text-align: center; margin-top: 20px; font-family: 'Segoe UI', sans-serif; width: 90%; max-width: 800px; }
     h1 { color: var(--primary); margin-bottom: 5px; font-family: 'Georgia', serif; }
     
     .acciones-header {
@@ -51,15 +57,17 @@
     .btn-accion {
       background-color: var(--primary); color: white; padding: 10px 20px;
       border: none; border-radius: 25px; font-size: 15px; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(138, 28, 49, 0.3); transition: transform 0.2s;
+      box-shadow: 0 4px 10px rgba(138, 28, 49, 0.3); transition: transform 0.2s, opacity 0.2s;
       font-family: 'Segoe UI', sans-serif;
+      display: inline-flex; align-items: center; gap: 5px;
     }
-    .btn-accion:hover { transform: translateY(-2px); }
+    .btn-accion:hover:not(:disabled) { transform: translateY(-2px); }
+    .btn-accion:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secundario {
       background-color: #fff; color: var(--primary); border: 2px solid var(--primary);
     }
     #fileInput { display: none; }
-    #status { margin-top: 10px; font-size: 14px; color: #666; height: 20px; font-weight: bold; }
+    #status { margin-top: 10px; font-size: 14px; color: #666; min-height: 20px; font-weight: bold; }
 
     /* --- CONTENEDOR DEL LIBRO 3D --- */
     #book-container {
@@ -69,7 +77,7 @@
       margin: 20px auto 40px auto;
       display: block;   
     }
-    
+
     /* --- PÁGINAS DEL LIBRO --- */
     .page {
       background-color: var(--page-bg);
@@ -85,20 +93,78 @@
       background-image: radial-gradient(circle, #fff 0%, var(--page-bg) 100%);
     }
 
+    /* ESTILO DE PORTADA Y CONTRAPORTADA */
     .page-cover {
       background-color: var(--primary);
       color: white;
-      border: 2px solid #5a1220;
+      border: 3px solid #5a1220;
     }
-    .page-cover h2 { font-size: 2.2rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center; margin: 0; }
-    .page-cover p { font-size: 1.2rem; font-style: italic; opacity: 0.9; margin-top: 10px; }
     
+    /* Portada ajustada para incluir portada.png con respaldo de degradado */
+    .cover-content {
+      background: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url('portada.png') center/cover no-repeat, linear-gradient(135deg, #8a1c31 0%, #5a1220 100%);
+      padding: 20px;
+    }
+    
+    .cover-frame {
+      border: 2px dashed rgba(255, 255, 255, 0.7);
+      padding: 30px 20px;
+      border-radius: 8px;
+      text-align: center;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(2px);
+    }
+    .cover-frame h2 { 
+      font-size: 2.2rem; 
+      margin: 0; 
+      color: #fff; 
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6); 
+    }
+    .cover-sub { 
+      font-size: 1.2rem; 
+      margin-top: 15px; 
+      font-style: italic; 
+      color: #ffd1d9; 
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    }
+    .cover-footer { 
+      font-size: 0.8rem; 
+      margin-top: 30px; 
+      opacity: 0.9; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+    }
+    
+    /* Imágenes adaptables con marco Polaroid dinámico */
+    .page-content img {
+      max-width: 85%;
+      max-height: 70%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      background-color: #fff;
+      border: 8px solid white; 
+      border-bottom: 25px solid white; 
+      box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
+      border-radius: 2px;
+    }
+
+    .btn-ver {
+      margin-top: 12px; background-color: transparent; border: 1px solid var(--primary);
+      color: var(--primary); padding: 6px 14px; border-radius: 15px;
+      cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 12px;
+      transition: 0.3s;
+    }
+    .btn-ver:hover { background-color: var(--primary); color: white; }
+
     /* --- VISTA GALERÍA TRADICIONAL --- */
     #gallery-container {
-      display: none; /* Oculto por defecto */
+      display: none;
       width: 90%; max-width: 1000px;
       margin: 30px auto;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 25px;
       padding-bottom: 50px;
     }
@@ -106,41 +172,23 @@
       background: white; padding: 15px 15px 25px 15px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.15); border-radius: 4px;
       display: flex; flex-direction: column; align-items: center;
-      transition: transform 0.3s;
+      transition: transform 0.3s, box-shadow 0.3s;
     }
-    .polaroid-card:hover { transform: translateY(-5px); }
+    .polaroid-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     .polaroid-card img {
       width: 100%; height: 260px; object-fit: cover; border-radius: 2px;
       cursor: pointer;
     }
     .polaroid-card span {
-      margin-top: 15px; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #555;
+      margin-top: 15px; font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #555; word-break: break-word; text-align: center;
     }
-
-    /* Imágenes tipo Polaroid dentro del libro con tamaño controlado */
-    .page-content img {
-      width: 220px;
-      height: 250px;
-      object-fit: cover;
-      background-color: #fff;
-      border: 8px solid white; 
-      border-bottom: 30px solid white; 
-      box-shadow: 2px 4px 15px rgba(0,0,0,0.2);
-    }
-
-    .btn-ver {
-      margin-top: 12px; background-color: transparent; border: 1px solid var(--primary);
-      color: var(--primary); padding: 5px 12px; border-radius: 15px;
-      cursor: pointer; font-family: 'Segoe UI', sans-serif; font-size: 12px;
-      transition: 0.3s;
-    }
-    .btn-ver:hover { background-color: var(--primary); color: white; }
 
     /* --- VISOR (LIGHTBOX) --- */
     #lightbox {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background-color: rgba(0, 0, 0, 0.9); z-index: 3000;
       flex-direction: column; align-items: center; justify-content: center;
+      user-select: none;
     }
     #lightbox-img {
       max-width: 90%; max-height: 80vh; transition: transform 0.2s ease-out;
@@ -149,6 +197,7 @@
     .cerrar-lightbox {
       position: absolute; top: 20px; right: 30px; font-size: 40px;
       color: white; cursor: pointer; font-weight: bold; z-index: 3010;
+      line-height: 1;
     }
     .controles-zoom {
       position: absolute; bottom: 30px; display: flex; gap: 15px; z-index: 3010;
@@ -161,7 +210,12 @@
     }
     .btn-zoom:hover { background: rgba(255,255,255,0.5); }
     
-    .loading-spinner { font-family: 'Segoe UI', sans-serif; font-size: 16px; color: #d62828; margin-top: 20px; font-weight: bold; text-align: center; }
+    .loading-spinner { font-family: 'Segoe UI', sans-serif; font-size: 16px; color: var(--primary); margin-top: 20px; font-weight: bold; text-align: center; }
+
+    @media (max-width: 600px) {
+      #book-container { height: 420px; }
+      .page-content img { max-width: 85%; max-height: 65%; }
+    }
   </style>
 </head>
 <body>
@@ -171,16 +225,16 @@
   </audio>
 
   <div id="pantalla-bienvenida">
-    <h1>Para Karissa ❤️</h1>
-    <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center;">Nuestro pequeño espacio especial...</p>
-    <button class="btn-entrar" onclick="iniciarExperiencia()">Abrir el Álbum ✨</button>
+    <h1>Richi y Kari ❤️</h1>
+    <p style="margin-bottom: 30px; color: #666; font-size: 1.1rem; text-align: center;">Cada foto, tiene anecdotas que me hacen tener una sonrisa en mi rostro y recordaré hasta que seamos viejitos, juntos</p>
+    <button class="btn-entrar" onclick="iniciarExperiencia()">Abrir el Álbum</button>
   </div>
 
   <header>
     <h1>Nuestro Álbum</h1>
     <div class="acciones-header">
-      <button class="btn-accion" onclick="document.getElementById('fileInput').click()">+ Añadir recuerdo</button>
-      <button class="btn-accion btn-secundario" id="btnCambiarVista" onclick="alternarVista()">🖼️ Ver en Galería</button>
+      <button class="btn-accion" id="btnSubirFoto" onclick="document.getElementById('fileInput').click()">+ Añadir foto</button>
+      <button class="btn-accion btn-secundario" id="btnCambiarVista" onclick="alternarVista()">Ver en Galería</button>
     </div>
     <input type="file" id="fileInput" accept="image/*" onchange="subirFoto(this)">
     <div id="status"></div>
@@ -189,7 +243,9 @@
   <div id="loadingText" class="loading-spinner"></div>
   
   <!-- Contenedor del Libro 3D -->
-  <div id="book-container"></div>
+  <div id="book-container">
+    <div id="book"></div>
+  </div>
 
   <!-- Contenedor de la Galería Tradicional -->
   <div id="gallery-container"></div>
@@ -197,7 +253,7 @@
   <!-- Lightbox de Zoom -->
   <div id="lightbox">
     <span class="cerrar-lightbox" onclick="cerrarLightbox()">&times;</span>
-    <img id="lightbox-img" src="">
+    <img id="lightbox-img" src="" alt="Vista ampliada">
     <div class="controles-zoom">
       <button class="btn-zoom" onclick="hacerZoom(0.3)">+</button>
       <button class="btn-zoom" onclick="hacerZoom(-0.3)">-</button>
@@ -205,7 +261,6 @@
   </div>
 
   <script>
-    // ⚠️ REEMPLAZA ESTO CON TU ENLACE DE GOOGLE APPS SCRIPT
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxK2wLxybyT5mjnMS5R8D9UCD1Axo6j_g0kM7S2_IojyS_2Op7M_R6Mj3DYOsvsraE/exec'; 
     
     let albumFlip = null; 
@@ -213,15 +268,27 @@
     let modoLibroActivo = true;
 
     function iniciarExperiencia() {
+      // Activar pantalla completa automáticamente
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(e => console.log("Pantalla completa bloqueada por el navegador:", e));
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+
       const musica = document.getElementById('musica-fondo');
       const pantalla = document.getElementById('pantalla-bienvenida');
+      
       musica.volume = 0.5; 
-      musica.play().catch(e => console.log("Audio no auto-reproducido."));
+      musica.play().catch(e => {
+        console.log("Audio no auto-reproducido por restricciones del navegador.");
+      });
       
       pantalla.style.opacity = '0';
       setTimeout(() => {
         pantalla.style.display = 'none';
-        document.getElementById('loadingText').innerText = '⏳ Desempolvando nuestro álbum...';
+        document.getElementById('loadingText').innerText = 'Abriendo album';
         cargarFotos(); 
       }, 800);
     }
@@ -233,14 +300,14 @@
       const btnVista = document.getElementById('btnCambiarVista');
 
       if (modoLibroActivo) {
-        bookContainer.style.display = 'block';
         galleryContainer.style.display = 'none';
-        btnVista.innerHTML = '🖼️ Ver en Galería';
+        bookContainer.style.display = 'block';
+        btnVista.innerHTML = 'Ver en Galería';
         renderizarLibro();
       } else {
         bookContainer.style.display = 'none';
         galleryContainer.style.display = 'grid';
-        btnVista.innerHTML = '📖 Ver como Libro';
+        btnVista.innerHTML = 'Ver como Libro';
         renderizarGaleria();
       }
     }
@@ -256,16 +323,36 @@
       lightbox.style.display = 'flex';
     }
 
-    function cerrarLightbox() { lightbox.style.display = 'none'; }
+    function cerrarLightbox() { 
+      lightbox.style.display = 'none'; 
+      imgLightbox.src = '';
+    }
+
     function hacerZoom(cambio) {
       nivelZoom += cambio;
       if (nivelZoom < 1) nivelZoom = 1; 
       if (nivelZoom > 4) nivelZoom = 4;
       imgLightbox.style.transform = `scale(${nivelZoom})`;
     }
+
     imgLightbox.addEventListener('wheel', (e) => {
       e.preventDefault();
       hacerZoom(e.deltaY < 0 ? 0.2 : -0.2);
+    });
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) {
+        cerrarLightbox();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.style.display === 'flex') {
+        if (e.key === 'Escape') cerrarLightbox();
+      } else if (modoLibroActivo && albumFlip) {
+        if (e.key === 'ArrowRight') albumFlip.flipNext();
+        if (e.key === 'ArrowLeft') albumFlip.flipPrev();
+      }
     });
 
     async function cargarFotos() {
@@ -280,7 +367,7 @@
           data = JSON.parse(textResponse);
         } catch (e) {
           console.error("Respuesta HTML recibida:", textResponse);
-          throw new Error("El script devolvió HTML en lugar de JSON. Revisa que tu SCRIPT_URL sea correcta y que la aplicación web esté desplegada públicamente ('Cualquier usuario').");
+          throw new Error("El script devolvió HTML en lugar de JSON. Revisa que tu SCRIPT_URL sea correcta y esté desplegada públicamente.");
         }
 
         statusText.style.display = 'none';
@@ -301,20 +388,32 @@
 
     function renderizarLibro() {
       const bookContainer = document.getElementById('book-container');
-      
-      if (albumFlip) { 
-        albumFlip.destroy(); 
+
+      // 1. Destruir objeto previo si existe
+      if (albumFlip) {
+        try {
+          albumFlip.destroy();
+        } catch (e) {
+          console.log("Limpiando flipbook anterior...");
+        }
         albumFlip = null;
       }
-      
+
+      // 2. Recrear completamente el div #book para borrar envoltorios previos
+      bookContainer.innerHTML = '<div id="book"></div>';
+      const bookWrapper = document.getElementById('book');
+
       let htmlContent = '';
 
+      // PORTADA
       htmlContent += `
-        <div class="page" data-density="hard">
-          <div class="page-content page-cover">
-            <h2>Nuestro Álbum</h2>
-            <p>Karissa & Yo ❤️</p>
-            <span style="font-size: 0.8rem; margin-top: 40px; opacity: 0.6;">(Arrastra la esquina)</span>
+        <div class="page page-cover" data-density="hard">
+          <div class="page-content cover-content">
+            <div class="cover-frame">
+              <h2>Nuestro Álbum</h2>
+              <div class="cover-sub">Richi y Kari ❤️</div>
+              <div class="cover-footer">Usa las flechas o arrastra para ojear</div>
+            </div>
           </div>
         </div>
       `;
@@ -325,7 +424,7 @@
             <div class="page">
               <div class="page-content">
                 <img src="${photo.url}" alt="Recuerdo">
-                <button class="btn-ver" onclick="abrirLightbox('${photo.url}')">🔍 Ver foto en grande</button>
+                <button class="btn-ver" onclick="abrirLightbox('${photo.url}')">Ver foto en grande</button>
               </div>
             </div>
           `;
@@ -347,32 +446,43 @@
         `;
       }
 
+      // CONTRAPORTADA
       htmlContent += `
-        <div class="page" data-density="hard">
-          <div class="page-content page-cover">
-            <h2>Fin</h2>
-            <p>Por ahora...</p>
+        <div class="page page-cover" data-density="hard">
+          <div class="page-content cover-content">
+            <div class="cover-frame">
+              <h2>Fin</h2>
+              <div class="cover-sub">Continuará...</div>
+            </div>
           </div>
         </div>
       `;
 
-      bookContainer.innerHTML = htmlContent;
+      bookWrapper.innerHTML = htmlContent;
 
-      albumFlip = new St.PageFlip(bookContainer, {
-        width: 400,
-        height: 500,
-        size: "stretch",
-        minWidth: 300,
-        maxWidth: 400,        
-        minHeight: 400,
-        maxHeight: 500,
-        showCover: true,
-        usePortrait: true,
-        mobileScrollSupport: false,
-        maxShadowOpacity: 0.4
+      // 3. Esperar el renderizado visual antes de inicializar PageFlip
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          const el = document.getElementById('book');
+          if (!el) return;
+
+          albumFlip = new St.PageFlip(el, {
+            width: 400,
+            height: 500,
+            size: "stretch",
+            minWidth: 280,
+            maxWidth: 400,        
+            minHeight: 380,
+            maxHeight: 500,
+            showCover: true,
+            usePortrait: true,
+            mobileScrollSupport: false,
+            maxShadowOpacity: 0.4
+          });
+
+          albumFlip.loadFromHTML(el.querySelectorAll('.page'));
+        }, 100);
       });
-
-      albumFlip.loadFromHTML(document.querySelectorAll('.page'));
     }
 
     function renderizarGaleria() {
@@ -400,8 +510,11 @@
       
       const file = input.files[0];
       const status = document.getElementById('status');
+      const btnSubir = document.getElementById('btnSubirFoto');
+
       status.style.color = "#8a1c31";
       status.innerText = '⏳ Subiendo foto al álbum...';
+      if (btnSubir) btnSubir.disabled = true;
 
       const reader = new FileReader();
       reader.onload = async function() {
@@ -420,7 +533,7 @@
           try {
             result = JSON.parse(textResponse);
           } catch (e) {
-            throw new Error("El servidor devolvió HTML al intentar subir la foto. Verifica los permisos de despliegue de tu Apps Script.");
+            throw new Error("El servidor devolvió HTML al intentar subir la foto.");
           }
 
           if (result.success) {
@@ -439,6 +552,9 @@
           status.style.color = "red";
           status.innerText = 'Error de conexión.';
           console.error(error);
+        } finally {
+          if (btnSubir) btnSubir.disabled = false;
+          input.value = '';
         }
       };
       reader.readAsDataURL(file);
